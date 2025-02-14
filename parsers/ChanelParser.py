@@ -26,28 +26,27 @@ class Scraper:
     def get_product_positions(self, path):
         response = self.get_request(path)
         tree = fromstring(response.text)
-        positions = tree.xpath('//article[@class="product"]')
-
+        positions = tree.xpath('//li[@class="fs-products-grid__product-grid__item"]')
         return positions
 
     def iterate_products(self, positions):
         for pos in positions:
-            link = pos.xpath('.//a[@itemprop="url"]/@href')[0]
-            pos_page = fromstring(self.get_request(link).text)
-            title = pos_page.xpath('//div[@class="product-details"]//span//text()')[0].strip().lower()
+            link = pos.xpath('.//a[@class="fs-product-item__link"]/@href')[0]
+            link = link.replace(self.url, '')
+            title = link.split('/')[-2].replace('-', ' ').lower()
             title = title.replace("/", "-")
-            pictures = list(set(pos_page.xpath('//img[@itemprop="image"]/@src')))
+            pictures = pos.xpath('.//img[@class="fs-image__img"]/@src')
 
             paths = []
-            os.makedirs("dataset/rick_owens/" + title, exist_ok=True)
+            os.makedirs("dataset/chanel/" + title, exist_ok=True)
             for i in range(len(pictures)):
-                with open(f"dataset/rick_owens/{title}/{i}.jpg", "wb") as img:
-                    paths.append(f"rick_owens/{title}/{i}.jpg")
+                with open(f"dataset/chanel/{title}/{i}.jpg", "wb") as img:
+                    paths.append(f"chanel/{title}/{i}.jpg")
                     img.write(requests.get(pictures[i]).content)
 
             self.products.append(
                 {
-                    "brand": "Rick Owens",
+                    "brand": "Chanel",
                     "title": title,
                     "pictures": paths,
                 }
@@ -56,19 +55,25 @@ class Scraper:
             print(title, " - done")
 
     def paginate(self, path):
-        positions = self.get_product_positions(path)
-        self.iterate_products(positions)
+        tree = fromstring(self.get_request(path).text)
+        n_pages = int(tree.xpath('//ul[@class="fs-product-grid__load-more__page-list__hidden"]//a/text()')[-1])
+        print()
+        for page in range(1, n_pages + 1):
+            positions = self.get_product_positions(path + f"page-{page}/")
+            self.iterate_products(positions)
 
     def pipeline(self):
-        men_path = "/en/BR/men/section/all?utf8=✓&view_all=true"
-        women_path = "/en/BR/women/section/all?view_all=true"
-        self.paginate(men_path)
-        self.paginate(women_path)
-        export_to_csv(self.products)
+        ready_to_wear = "/us/fashion/ready-to-wear/"
+        tree = fromstring(self.get_request(ready_to_wear).text)
+        categories = tree.xpath('//a[@id="button-fs-button-fs-qca-modal__btn-link"]/@href')[2:]
+        for url in categories:
+            path = url.replace(self.url, "")
+            self.paginate(path)
+        print()
 
 
 def main():
-    url = "https://www.rickowens.eu"
+    url = "https://www.chanel.com"
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3'
     }
