@@ -70,11 +70,11 @@ class Scraper:
         self.iterate_products(positions, page_num)
 
     def pipeline(self):
-        # men_RFW_path = "/nl/en/men/ready-to-wear/?page=17"
+        men_RFW_path = "/nl/en/men/ready-to-wear/?page=17"
         men_shoes_path = "/nl/en/men/shoes/?page=4"
         women_RFW_path = "/nl/en/women/ready-to-wear/?page=16"
         women_shoes_path = "/nl/en/women/shoes/?page=7"
-        # self.paginate(men_RFW_path, 0)
+        self.paginate(men_RFW_path, 0)
         self.paginate(men_shoes_path, 1)
         self.paginate(women_RFW_path, 2)
         self.paginate(women_shoes_path, 3)
