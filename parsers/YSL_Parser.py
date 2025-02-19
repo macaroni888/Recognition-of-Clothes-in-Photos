@@ -56,7 +56,13 @@ class Scraper:
 
     def paginate(self, path, page_n, gender):
         for page in range(0, page_n + 1):
+            # Ready to wear
             suffix = f",ready-to-wear?locale=en-en&page={page}&categoryContext={gender}_clothing&categoryIds=view-all-rtw-{gender}&isEmployeeOnly=false&isEmployee=false&clickAnalytics=true&hitsPerPage=15"
+            positions = self.get_product_positions(path + suffix)
+            self.iterate_products(positions)
+
+            # Shoes
+            suffix = f",shoes?locale=en-en&page={page}&categoryContext={gender}_shoes&categoryIds=view-all-shoes-{gender}&isEmployeeOnly=false&isEmployee=false&clickAnalytics=true&hitsPerPage=15"
             positions = self.get_product_positions(path + suffix)
             self.iterate_products(positions)
 
@@ -65,10 +71,13 @@ class Scraper:
         men_n_of_pages = 11
         women = "/api/v1/category/shop-women"
         women_n_of_pages = 14
-        # self.paginate(men, men_n_of_pages, "men")
+        self.paginate(men, men_n_of_pages, "men")
         print("Men page is parsed")
         self.paginate(women, women_n_of_pages, "women")
         print("Women page is parsed")
+
+        'https://www.ysl.com/api/v1/category/shop-men,shoes?locale=en-en&page=0&categoryContext=men_shoes&categoryIds=view-all-shoes-men&isEmployeeOnly=false&isEmployee=false&clickAnalytics=true&hitsPerPage=15'
+
         export_to_csv(self.products)
 
 
