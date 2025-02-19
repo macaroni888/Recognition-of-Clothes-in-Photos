@@ -69,8 +69,13 @@ class Scraper:
 
     def pipeline(self):
         men_RFW_path = "/en_ch/fashion/mens-fashion/ready-to-wear/all-ready-to-wear"
-        women_RFW_path = "/en_ch/fashion/mens-fashion/ready-to-wear/all-ready-to-wear"
+        men_shoes_path = "/en_ch/fashion/mens-fashion/shoes/all-shoes"
+        women_RFW_path = "/en_ch/fashion/womens-fashion/ready-to-wear/all-ready-to-wear"
+        women_shoes_path = "/en_ch/fashion/womens-fashion/shoes/all-shoes"
         self.paginate(men_RFW_path)
+        self.paginate(men_shoes_path)
+        self.paginate(women_RFW_path)
+        self.paginate(women_shoes_path)
         export_to_csv(self.products)
 
 
