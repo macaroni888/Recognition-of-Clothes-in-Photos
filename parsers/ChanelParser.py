@@ -56,7 +56,6 @@ class Scraper:
     def paginate(self, path):
         tree = fromstring(self.get_request(path).text)
         n_pages = int(tree.xpath('//ul[@class="fs-product-grid__load-more__page-list__hidden"]//a/text()')[-1])
-        print()
         for page in range(1, n_pages + 1):
             positions = self.get_product_positions(path + f"page-{page}/")
             self.iterate_products(positions)
