@@ -32,7 +32,6 @@ class Scraper:
     def iterate_products(self, positions):
         for pos in positions:
             link = pos.xpath('.//a[@class="fs-product-item__link"]/@href')[0]
-            link = link.replace(self.url, '')
             title = link.split('/')[-2].replace('-', ' ').lower()
             title = title.replace("/", "-")
             pictures = pos.xpath('.//img[@class="fs-image__img"]/@src')
@@ -42,7 +41,7 @@ class Scraper:
             for i in range(len(pictures)):
                 with open(f"dataset/chanel/{title}/{i}.jpg", "wb") as img:
                     paths.append(f"chanel/{title}/{i}.jpg")
-                    img.write(requests.get(pictures[i]).content)
+                    img.write(requests.get(pictures[i], headers=self.headers).content)
 
             self.products.append(
                 {
