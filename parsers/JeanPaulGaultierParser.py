@@ -24,9 +24,9 @@ driver = webdriver.Chrome(service=service)
 driver.get("https://fashion.jeanpaulgaultier.com/en-fr/categories/new-in")
 
 # Прокручиваем страницу до конца, чтобы подгрузить все товары
-body = driver.find_element(By.TAG_NAME, 'body')
-for i in range(28): # 28
-    body.send_keys(Keys.END)
+body = driver.find_element(By.TAG_NAME, 'body')  # Находим тег <body> (буквально тело страницы)
+for i in range(28):  # Прокручиваем страницу 28 раз
+    body.send_keys(Keys.END)  # клавиша end прокручивает страницу до конца
     time.sleep(3)  # Подождать, чтобы данные успели подгрузиться
 
 # Получаем HTML код страницы
