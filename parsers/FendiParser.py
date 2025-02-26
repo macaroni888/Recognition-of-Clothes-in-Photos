@@ -29,7 +29,7 @@ class Scraper:
             new_path = path + f"?page={i + 1}" if i > 0 else path
             response = self.get_request(new_path)
             tree = fromstring(response.text)
-            positions.extend(tree.xpath('//div[@is="m-product-tile"]'))
+            positions.extend(tree.xpath('//li[@class="c-tiles col-6 col-lg-3 d-flex flex-column"]'))
 
         return positions
 
@@ -39,30 +39,30 @@ class Scraper:
             counter += 1
             link = str()
             try:
-                link = pos.xpath('.//a[@is="m-tile-images"]/@href')[0]
+                link = pos.xpath('.//a[@class="link-background"]/@href')[0]
             except IndexError:
                 print(pos.attrib)
                 continue
 
-            pos_page = fromstring(self.get_request(link).text)
-            title = pos_page.xpath('//h1[@class="t-big-bold"]/text()')[0].strip().lower()
+            pos_page = fromstring(requests.get(link, headers=self.headers).text)
+            title = pos_page.xpath('//p[@class="product-short-description font-small"]/text()')[0].strip().lower()
             title = title.replace("/", "-")
 
-            pictures = pos_page.xpath('//picture[@class="swiper-slide"]')
+            section = pos_page.xpath('//section[@id="hero-product-carousel"]')[0]
+            pictures = section.xpath('.//a/@data-src')
 
             paths = []
             dir_name = f"id_{page_num}_{counter}"
-            os.makedirs("dataset/Kenzo/" + dir_name, exist_ok=True)
+            os.makedirs("dataset/Fendi/" + dir_name, exist_ok=True)
             for i in range(len(pictures)):
-                img_link = pictures[i].xpath('.//img/@srcset')[0]
-                img_link = img_link[img_link.rfind('https://') : img_link.rfind(' ')]
-                with open(f"dataset/Kenzo/{dir_name}/{i}.jpg", "wb") as img:
-                    paths.append(f"Kenzo/{dir_name}/{i}.jpg")
+                img_link = pictures[i]
+                with open(f"dataset/Fendi/{dir_name}/{i}.jpg", "wb") as img:
+                    paths.append(f"Fendi/{dir_name}/{i}.jpg")
                     img.write(requests.get(img_link).content)
 
             self.products.append(
                 {
-                    "brand": "Kenzo",
+                    "brand": "Fendi",
                     "title": title,
                     "pictures": paths,
                 }
@@ -74,15 +74,15 @@ class Scraper:
         self.iterate_products(positions, page_num)
 
     def pipeline(self):
-        men_RFW_path = "/en-nl/c-men/see-all"
-        women_RFW_path = "/en-nl/c-women/see-all"
-        self.paginate(men_RFW_path, 0, 12)
-        self.paginate(women_RFW_path, 2, 11)
+        men_RFW_path = "/nl-en/man/ready-to-wear?start=0&sz=168"
+        women_RFW_path = "/nl-en/woman/ready-to-wear?start=0&sz=204"
+        self.paginate(men_RFW_path, 0, 1)
+        self.paginate(women_RFW_path, 2, 1)
         export_to_csv(self.products)
 
 
 def main():
-    url = "https://www.kenzo.com"
+    url = "https://www.fendi.com"
     headers = {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36'
     }
