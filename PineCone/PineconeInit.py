@@ -9,9 +9,9 @@ import torch.multiprocessing as mp
 
 from tqdm import tqdm
 
-from Embedding.EmbeddingModel import ResNetEmbedding
+from EmbeddingModel import ResNetEmbedding
 
-from pinecone import Pinecone
+from pinecone import Pinecone, ServerlessSpec
 
 load_dotenv()
 
@@ -32,7 +32,7 @@ embedding_model.load_state_dict(checkpoint["model_state_dict"])
 embedding_model.to(device)
 embedding_model.eval()
 
-index = pc.Index("clothes-images")
+index = pc.Index("clothes-images-2")
 
 progress_bar = tqdm(loader, desc="Buildimg embeddings")
 for batch in progress_bar:
@@ -43,7 +43,7 @@ for batch in progress_bar:
         vectors.append({
             "id": str(idx.item()),
             "values": embedding.tolist()[0],
-            "metadata": {"brand": brand, "name": name}
+            "metadata": {"brand": brand, "name": name, "image": image.tolist()[0]}
         })
-    index.upsert(vectors=vectors, namespace="clothes-images")
+    index.upsert(vectors=vectors, namespace="clothes-images-2")
 

@@ -10,7 +10,7 @@ from torchvision.io import read_image
 
 def get_transform_vis():
     transforms = []
-    transforms.append(T.Resize((512, 512)))
+    # transforms.append(T.Resize((512, 512)))
     transforms.append(T.ToDtype(torch.float, scale=True))
     transforms.append(T.ToPureTensor())
     return T.Compose(transforms)
@@ -64,14 +64,22 @@ def get_masks(image, prediction, output_dir, th_mask=0.5, th_box=0.3):
 def get_segm(path_input, output_directory):
     device = torch.device('cpu')
     model_v4 = model.get_model_v4(num_classes=17)
-    checkpoint = torch.load('Segmentation/models/mask-rcnn-6-29.pth', map_location=device)
+    try:
+        checkpoint = torch.load('Segmentation/models/mask-rcnn-6-29.pth', map_location=device)
+    except FileNotFoundError:
+        print("Модель не найдена. Проверьте, что вы установили модель (см. README.md).")
+        return
 
     model_v4.load_state_dict(checkpoint['model_state_dict'])
     model_v4.to(device)
     model_v4.eval()
 
     to_tensor = get_transform_vis()
-    image_upload = read_image(path_input)
+    try:
+        image_upload = read_image(path_input)
+    except FileNotFoundError:
+        print("Файл не найден. Проверьте путь к файлу.")
+        return
     image = to_tensor(image_upload)
 
     image_upload_2 = Image.open(path_input).convert("RGB")

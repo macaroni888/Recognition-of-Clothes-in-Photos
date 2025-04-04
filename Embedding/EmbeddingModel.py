@@ -26,14 +26,15 @@ def load_embedding_model(weights_path, device):
     return embedding_model
 
 
-def make_embedding(embedding_model, img_path):
+def make_embedding(embedding_model, img_path, device):
     embedding_model.eval()
     transform = transforms.Compose([
         transforms.Resize((224, 224)),
         transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+        # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
     ])
     image = Image.open(img_path).convert("RGB")
     image = transform(image).unsqueeze(0)
+    image = image.to(device)
     embedding = embedding_model(image).cpu().detach().numpy()
     return embedding.tolist()[0]

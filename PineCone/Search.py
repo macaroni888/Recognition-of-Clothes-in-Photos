@@ -36,16 +36,16 @@ def search(paths_to_images, answer_path):
     pc = Pinecone(api_key=API_KEY)
     index = pc.Index("clothes-images")
 
-    for path in paths_to_images:
-        embedding = make_embedding(embedding_model, path)
+    for i, path in enumerate(paths_to_images):
+        embedding = make_embedding(embedding_model, path, device)
         results = index.query(
             namespace="clothes-images",
             vector=embedding,
-            top_k=5,
+            top_k=10,
             include_metadata=True,
             include_values=False
         )
-        for i, res in enumerate(results):
+        for res in results["matches"]:
             idx = int(res["id"])
             metadata = res["metadata"]
             brand = metadata["brand"]
@@ -58,5 +58,5 @@ def search(paths_to_images, answer_path):
 
             saving_dir = os.path.join(answer_path, f"result_{i + 1}")
             os.makedirs(saving_dir, exist_ok=True)
-            found_image_path = os.path.join(saving_dir, f"{brand}_{name}")
+            found_image_path = os.path.join(saving_dir, f"{brand}_{name}.jpg")
             found_image.save(found_image_path)

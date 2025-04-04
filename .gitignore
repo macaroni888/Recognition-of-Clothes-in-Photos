@@ -1,8 +1,7 @@
 /venv/
-!/embedding_checkpoints/triplet_loss_trained_20.pth
+!/Embedding/embedding_checkpoints/triplet_loss_trained_20.pth
 /.env
 /parsers/dataset/
 *.jpg
 *.png
 *.jpeg
-/masks
