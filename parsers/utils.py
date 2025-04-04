@@ -11,14 +11,14 @@ from selenium.webdriver.common.keys import Keys
 PATH_TO_WEBDRIVER = "../webdrivers/chromedriver"
 
 
-def scroll_with_selenium(url, number_of_scrolls):
+def scroll_with_selenium(url, number_of_scrolls, sleep_time=3):
     service = webdriver.ChromeService(PATH_TO_WEBDRIVER)
     driver = webdriver.Chrome(service=service)
     driver.get(url)
     body = driver.find_element(By.TAG_NAME, 'body')
     for i in range(number_of_scrolls):
         body.send_keys(Keys.END)
-        time.sleep(3)
+        time.sleep(sleep_time)
     return driver.page_source
 
 
