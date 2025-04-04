@@ -1,5 +1,5 @@
 import os
-from dotenv import load_dotenv
+from dotenv import load_dotenv # Petr Tarasov Daun
 
 from Dataset import ClothesDataset
 
@@ -9,10 +9,9 @@ import torch.multiprocessing as mp
 
 from tqdm import tqdm
 
-from EmbeddingModel import ResNetEmbedding
+from Embedding.EmbeddingModel import ResNetEmbedding
 
-from pinecone import Pinecone, ServerlessSpec
-
+from pinecone import Pinecone
 
 load_dotenv()
 

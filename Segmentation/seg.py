@@ -4,7 +4,7 @@ import numpy as np
 import cv2
 import os
 from PIL import Image
-import model
+from Segmentation import model
 from torchvision.io import read_image
 
 
@@ -31,6 +31,8 @@ def get_masks(image, prediction, output_dir, th_mask=0.5, th_box=0.3):
 
     classes = set()
 
+    paths = []
+
     for i in range(len(masks)):
         if scores[i] < th_box:
             continue
@@ -50,15 +52,19 @@ def get_masks(image, prediction, output_dir, th_mask=0.5, th_box=0.3):
 
         filename = f"{output_dir}/{class_name}_{i}.png"
 
+        paths.append(filename)
+
         cv2.imwrite(filename, cv2.cvtColor(segmented, cv2.COLOR_RGB2BGR))
 
     print(f"Сохранено в {output_dir}")
+
+    return paths
 
 
 def get_segm(path_input, output_directory):
     device = torch.device('cpu')
     model_v4 = model.get_model_v4(num_classes=17)
-    checkpoint = torch.load('./models/mask-rcnn-6-29.pth', map_location=device)
+    checkpoint = torch.load('Segmentation/models/mask-rcnn-6-29.pth', map_location=device)
 
     model_v4.load_state_dict(checkpoint['model_state_dict'])
     model_v4.to(device)
@@ -75,7 +81,5 @@ def get_segm(path_input, output_directory):
 
     os.makedirs(output_directory, exist_ok=True)
 
-    get_masks(image_2, prediction, output_directory)
-
-
-get_segm('./Amineh_Kakabaveh_1.jpg', './masks')
+    paths = get_masks(image_2, prediction, output_directory)
+    return paths
