@@ -29,11 +29,17 @@ def get_masks(image, prediction, output_dir, th_mask=0.5, th_box=0.3):
     threshold = torch.Tensor([th_mask])
     masks = (masks > threshold).bool()
 
+    classes = set()
+
     for i in range(len(masks)):
         if scores[i] < th_box:
             continue
 
         if labels[i] == 1:
+            continue
+
+        class_name = names[labels[i] - 2]
+        if class_name in classes:
             continue
 
         x1, y1, x2, y2 = map(int, boxes[i])
@@ -42,7 +48,6 @@ def get_masks(image, prediction, output_dir, th_mask=0.5, th_box=0.3):
         segmented = np.ones((y2-y1, x2-x1, 3), dtype=np.uint8) * 255
         segmented[mask_bbox] = image[y1:y2, x1:x2][mask_bbox]
 
-        class_name = names[labels[i] - 2]
         filename = f"{output_dir}/{class_name}_{i}.png"
 
         cv2.imwrite(filename, cv2.cvtColor(segmented, cv2.COLOR_RGB2BGR))
@@ -73,4 +78,4 @@ def get_segm(path_input, output_directory):
     get_masks(image_2, prediction, output_directory)
 
 
-get_segm('./ft61n4fdp5945usv33q0mwzngw19j9j8.jpg', './masks')
+get_segm('./Amineh_Kakabaveh_1.jpg', './masks')
