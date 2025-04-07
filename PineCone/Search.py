@@ -4,6 +4,7 @@ from PineCone.Dataset import ClothesDataset
 from pinecone import Pinecone
 
 import os
+import shutil
 from dotenv import load_dotenv
 
 import torch
@@ -21,6 +22,16 @@ def denormalize(image_tensor):
 
 
 def search(paths_to_images, answer_path):
+    if os.path.exists(answer_path):
+        user_answer = input(f"Папка {answer_path} уже существует. Перезаписать? (y/n): ")
+        while user_answer.lower() not in ['y', 'n']:
+            user_answer = input("Введите 'y' для перезаписи или 'n' для выхода: ")
+        if user_answer.lower() == 'n':
+            print("Завершение программы.")
+            return
+        print("Поиск изображений в базе данных... ")
+        shutil.rmtree(answer_path)
+
     load_dotenv()
 
     API_KEY = os.getenv("PINECONE_API_KEY")
@@ -34,14 +45,14 @@ def search(paths_to_images, answer_path):
     embedding_model.eval()
 
     pc = Pinecone(api_key=API_KEY)
-    index = pc.Index("clothes-images")
+    index = pc.Index("clothes-images-2")
 
     for i, path in enumerate(paths_to_images):
         embedding = make_embedding(embedding_model, path, device)
         results = index.query(
-            namespace="clothes-images",
+            namespace="clothes-images-2",
             vector=embedding,
-            top_k=10,
+            top_k=5,
             include_metadata=True,
             include_values=False
         )
@@ -50,13 +61,18 @@ def search(paths_to_images, answer_path):
             metadata = res["metadata"]
             brand = metadata["brand"]
             name = metadata["name"]
+            path = metadata["image"]
 
-            _, _, _, found_image = dataset[idx]
+            image = Image.open(os.path.join("parsers/dataset", path)).convert("RGB")
 
-            found_image = found_image.squeeze(0)
-            found_image = denormalize(found_image)
+            # _, _, _, found_image = dataset[idx]
+
+            # found_image = found_image.squeeze(0)
+            # found_image = denormalize(found_image)
 
             saving_dir = os.path.join(answer_path, f"result_{i + 1}")
             os.makedirs(saving_dir, exist_ok=True)
             found_image_path = os.path.join(saving_dir, f"{brand}_{name}.jpg")
-            found_image.save(found_image_path)
+            image.save(found_image_path)
+            # found_image.save(found_image_path)
+    print(f"Результаты сохранены в {answer_path}")

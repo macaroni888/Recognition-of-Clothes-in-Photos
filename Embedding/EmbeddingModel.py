@@ -18,8 +18,35 @@ class ResNetEmbedding(nn.Module):
         return self.resnet(x)
 
 
+class ApplyToNonWhite:
+    def __init__(self, threshold=1.0):
+        self.threshold = threshold
+
+        self.resize = transforms.Resize((224, 224))
+        self.to_tensor = transforms.ToTensor()
+
+        mean = [0.5261, 0.5012, 0.4964]
+        std = [0.3652, 0.3523, 0.3461]
+        self.normalize = transforms.Normalize(mean=mean, std=std)
+
+    def __call__(self, img):
+        cropped = self.resize(img)
+        cropped = self.to_tensor(cropped)
+
+        mask = (cropped < self.threshold).any(dim=0)
+
+        aug_img = cropped.clone()
+        aug_img = self.normalize(aug_img)
+
+        out = cropped.clone()
+        for c in range(3):
+            out[c][mask] = aug_img[c][mask]
+
+        return out
+
+
 def load_embedding_model(weights_path, device):
-    embedding_model = ResNetEmbedding()
+    embedding_model = ResNetEmbedding(256)
     checkpoint = load(weights_path, map_location=device)
     embedding_model.load_state_dict(checkpoint["model_state_dict"])
     embedding_model.to(device)
@@ -28,11 +55,8 @@ def load_embedding_model(weights_path, device):
 
 def make_embedding(embedding_model, img_path, device):
     embedding_model.eval()
-    transform = transforms.Compose([
-        transforms.Resize((224, 224)),
-        transforms.ToTensor(),
-        # transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-    ])
+    transform = ApplyToNonWhite()
+
     image = Image.open(img_path).convert("RGB")
     image = transform(image).unsqueeze(0)
     image = image.to(device)

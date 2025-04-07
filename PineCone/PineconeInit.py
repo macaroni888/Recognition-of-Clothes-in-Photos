@@ -1,5 +1,5 @@
 import os
-from dotenv import load_dotenv # Petr Tarasov Daun
+from dotenv import load_dotenv
 
 from Dataset import ClothesDataset
 

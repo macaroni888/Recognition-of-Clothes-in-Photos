@@ -33,6 +33,7 @@ def get_masks(image, prediction, output_dir, th_mask=0.5, th_box=0.3):
 
     paths = []
 
+    counter = 1
     for i in range(len(masks)):
         if scores[i] < th_box:
             continue
@@ -50,7 +51,8 @@ def get_masks(image, prediction, output_dir, th_mask=0.5, th_box=0.3):
         segmented = np.ones((y2-y1, x2-x1, 3), dtype=np.uint8) * 255
         segmented[mask_bbox] = image[y1:y2, x1:x2][mask_bbox]
 
-        filename = f"{output_dir}/{class_name}_{i}.png"
+        filename = f"{output_dir}/item_{counter}.png"
+        counter += 1
 
         paths.append(filename)
 

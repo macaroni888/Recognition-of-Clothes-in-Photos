@@ -9,11 +9,10 @@ class ClothesDataset(Dataset):
     def __init__(self, dataset_path, dataset_base):
         self.dataset_base = dataset_base
         self.data = pd.read_csv(dataset_path)
-        self.data.iloc[:, -1] = self.data.iloc[:, -1].apply(lambda x: eval(x)[0])
         self.transform = transforms.Compose([
             transforms.Resize((224, 224)),
             transforms.ToTensor(),
-            transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+            transforms.Normalize(mean=[0.5261, 0.5012, 0.4964], std=[0.3652, 0.3523, 0.3461]),
         ])
 
     def __len__(self):
